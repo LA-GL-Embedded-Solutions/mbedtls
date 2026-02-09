@@ -63,6 +63,9 @@
 #include "mbedtls/threading.h"
 #endif
 
+/* STM32 IWDG watchdog - pet during cert chain verification (SW crypto) */
+#include "iwdg.h"
+
 #if defined(MBEDTLS_HAVE_TIME)
 #if defined(_WIN32) && !defined(EFIX64) && !defined(EFI32)
 #include <windows.h>
@@ -2873,6 +2876,9 @@ static int x509_crt_verify_chain(
     child_is_trusted = 0;
 
     while( 1 ) {
+        /* Pet watchdog before each cert signature verification (SW crypto) */
+        vPetWatchdog();
+
         /* Add certificate to the verification chain */
         cur = &ver_chain->items[ver_chain->len];
         cur->crt = child;
